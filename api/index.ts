@@ -1,6 +1,5 @@
-import { proxy, serviceCount } from "../src/proxy.js"
-
-export const config = { runtime: "edge" }
+import type { IncomingMessage, ServerResponse } from "node:http"
+import { proxy } from "../src/proxy.js"
 
 const landingHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -36,32 +35,27 @@ const landingHtml = `<!DOCTYPE html>
   .try code{display:block;background:#0a0a0a;border:1px solid #262626;border-radius:6px;padding:12px 16px;font-size:0.82rem;color:#22c55e;overflow-x:auto;white-space:pre;font-family:'SF Mono',Consolas,monospace}
   .footer{color:#525252;font-size:0.8rem;padding:40px 24px;text-align:center}
   .footer a{color:#737373;text-decoration:none}
-  .badge{display:inline-block;background:#22c55e20;color:#22c55e;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-weight:600;margin-left:8px;vertical-align:middle}
 </style>
 </head>
 <body>
 <div class="hero">
   <h1><span>MPP</span> Gateway</h1>
   <p class="sub">43 APIs behind Machine Payments Protocol. Pay with stablecoins, access any API — no API keys needed on the client side.</p>
-
   <div class="stat-row">
     <div class="stat"><div class="num" id="svc-count">-</div><div class="label">Services Live</div></div>
     <div class="stat"><div class="num">43</div><div class="label">Total Available</div></div>
     <div class="stat"><div class="num">11</div><div class="label">Categories</div></div>
   </div>
-
   <div class="links">
     <a href="/discover" class="primary">Discover Services</a>
     <a href="/llms.txt" class="secondary">llms.txt</a>
     <a href="/discover/all.md" class="secondary">All Routes</a>
     <a href="https://github.com/0xinit/mpp-gateway" class="secondary">GitHub</a>
   </div>
-
   <div class="try">
     <h3>Try it</h3>
     <code>tempo request -t -X GET https://mpp-gateway.vercel.app/massive/v1/marketstatus/now</code>
   </div>
-
   <div class="section">
     <h2>Services</h2>
     <div class="grid" id="svc-grid"></div>
@@ -71,12 +65,17 @@ const landingHtml = `<!DOCTYPE html>
   Built for the <a href="https://hackathon.tempo.xyz">MPP Hackathon</a> by Tempo &amp; Stripe
 </div>
 <script>
-fetch('/discover').then(r=>r.json()).then(svcs=>{
+fetch('/discover').then(r=>{
+  const ct=r.headers.get('content-type')||'';
+  if(ct.includes('json')) return r.json();
+  return [];
+}).then(svcs=>{
+  if(!Array.isArray(svcs)) return;
   document.getElementById('svc-count').textContent=svcs.length;
   const grid=document.getElementById('svc-grid');
   svcs.forEach(s=>{
     const d=document.createElement('div');d.className='chip';
-    d.innerHTML='<div class="name">'+s.title+'</div><div class="cat">'+s.routes.length+' endpoints</div>';
+    d.innerHTML='<div class="name">'+(s.title||s.id)+'</div><div class="cat">'+(s.routes?s.routes.length:0)+' endpoints</div>';
     grid.appendChild(d);
   });
 }).catch(()=>{
@@ -86,19 +85,16 @@ fetch('/discover').then(r=>r.json()).then(svcs=>{
 </body>
 </html>`
 
-export default function handler(req: Request) {
-  const url = new URL(req.url)
+export default function handler(req: IncomingMessage, res: ServerResponse) {
+  const url = req.url ?? "/"
+  const accept = req.headers.accept ?? ""
+  const ua = req.headers["user-agent"] ?? ""
 
-  if (url.pathname === "/" || url.pathname === "") {
-    const accept = req.headers.get("accept") ?? ""
-    const ua = req.headers.get("user-agent") ?? ""
-    const wantsBrowser = accept.includes("text/html") && !ua.includes("curl") && !ua.includes("mppx")
-    if (wantsBrowser) {
-      return new Response(landingHtml, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
-      })
-    }
+  if ((url === "/" || url === "") && accept.includes("text/html") && !ua.includes("curl") && !ua.includes("mppx")) {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" })
+    res.end(landingHtml)
+    return
   }
 
-  return proxy.fetch(req)
+  proxy.listener(req, res)
 }

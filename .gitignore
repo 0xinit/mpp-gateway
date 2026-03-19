@@ -5,3 +5,5 @@ dist/
 *.log
 .claude/
 tempo-hackathon-memory/
+.vercel
+.env.swp

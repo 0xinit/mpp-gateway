@@ -33,6 +33,13 @@ export function financeServices() {
           "GET /v1/balance": mppx.charge({ amount: "0.005" }),
           "POST /v1/products": mppx.charge({ amount: "0.01" }),
           "POST /v1/prices": mppx.charge({ amount: "0.01" }),
+          // Stripe Climate
+          "GET /v1/climate/products": mppx.charge({ amount: "0.005" }),
+          "GET /v1/climate/products/:id": mppx.charge({ amount: "0.005" }),
+          "POST /v1/climate/orders": mppx.charge({ amount: "0.10" }),
+          "GET /v1/climate/orders": mppx.charge({ amount: "0.005" }),
+          "GET /v1/climate/orders/:id": mppx.charge({ amount: "0.005" }),
+          "POST /v1/climate/orders/:id/cancel": mppx.charge({ amount: "0.02" }),
         },
       }),
     )

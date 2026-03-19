@@ -51,6 +51,16 @@ Agent/Client                    MPP Gateway                     Upstream API
 
 Services load automatically when their API keys are present in the environment. Missing keys are silently skipped.
 
+### Active for hackathon demo
+
+| Service | Category | Example endpoint |
+|---------|----------|-----------------|
+| **Stripe** | Finance | `POST /stripe/v1/payment_intents` |
+| **Twilio** | Communications | `POST /twilio/2010-04-01/Accounts/:sid/Messages.json` |
+| **Plaid** | Finance | `POST /plaid/accounts/balance/get` |
+| **Massive** | Market Data | `GET /massive/v3/reference/tickers?ticker=AAPL` |
+| **GitHub** | Infrastructure | `GET /github/repos/:owner/:repo` |
+
 ## Quick start
 
 ```bash

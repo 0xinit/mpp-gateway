@@ -1,0 +1,22 @@
+{
+  "name": "mpp-gateway",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "MPP gateway wrapping 41 non-MPP APIs behind Tempo stablecoin payments",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "mppx": "^0.4.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.8.0",
+    "viem": "^2.47.4"
+  }
+}

@@ -1,4 +1,3 @@
-import "dotenv/config"
 import { Mppx, tempo } from "mppx/server"
 import { createClient, http } from "viem"
 import { tempo as tempoMainnet, tempoModerato } from "viem/chains"
